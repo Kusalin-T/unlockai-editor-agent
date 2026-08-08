@@ -35,7 +35,9 @@ yourself; only ask me when you need a choice or a password. Steps:
 6. Copy .env.example to .env and put in the API key I give you
    (GROQ_API_KEY=...). Ask me for the key now.
 7. Run: python tools/verify_setup.py — and fix anything that fails.
-8. When every check passes, say "READY" and show me the check output.
+8. Start the timeline UI in the background: python butacut/serve.py
+   — then open http://127.0.0.1:8766 in my default browser.
+9. When every check passes, say "READY" and show me the check output.
 ```
 
 3. When your agent says **READY**, you're done. In the workshop you'll also
