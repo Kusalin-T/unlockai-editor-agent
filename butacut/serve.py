@@ -67,8 +67,19 @@ CONFIG = load_config()
 ROOT = Path.cwd().resolve()
 CACHE_DIR = HERE / "cache"
 
+# single-project mode: `python serve.py path/to/video.mp4` shows only that video
+ONLY = None
+if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+    _cand = Path(sys.argv[1])
+    ONLY = _cand if _cand.is_absolute() else (ROOT / _cand)
+    if not ONLY.exists():
+        print("ERROR: video not found: %s" % ONLY)
+        sys.exit(1)
+
 
 def media_dirs():
+    if ONLY is not None:
+        return [ONLY.parent]
     out = []
     for entry in CONFIG.get("media_dirs", ["."]):
         for hit in sorted(glob.glob(str((ROOT / entry)))) or [str(ROOT / entry)]:
@@ -181,24 +192,63 @@ def load_edit(video, duration):
     doc["keeps"] = normalize_keeps(doc.get("keeps"), duration)
     doc.setdefault("text", [])
     doc.setdefault("sfx", [])
+    doc.setdefault("fx", [])
     return doc, mtime, valid
 
 
-def save_keeps(video, keeps, duration):
-    """Merge new keeps into the on-disk doc (preserving text/sfx from other
-    writers), write atomically, return new mtime."""
+def save_edit(video, body, duration):
+    """Merge the UI's fields into the on-disk doc (preserving anything else
+    other writers put there), write atomically, return new mtime."""
     p = edit_path(video)
     doc, _valid = read_json_tolerant(p)
     if not isinstance(doc, dict):
         doc = {}
     doc["version"] = 1
     doc["video"] = video.name
-    doc["keeps"] = [
-        {"in": round(float(k["in"]), 3), "out": round(float(k["out"]), 3),
-         "origin": k.get("origin", "user")}
-        for k in normalize_keeps(keeps, duration)]
+    if "keeps" in body:
+        doc["keeps"] = [
+            {"in": round(float(k["in"]), 3), "out": round(float(k["out"]), 3),
+             "origin": k.get("origin", "user")}
+            for k in normalize_keeps(body["keeps"], duration)]
+    if isinstance(body.get("text"), list):
+        clean = []
+        for ev in body["text"]:
+            try:
+                item = dict(ev)
+                item["in"] = round(float(ev["in"]), 3)
+                item["out"] = round(float(ev["out"]), 3)
+                item["content"] = str(ev.get("content", ""))
+                clean.append(item)
+            except (KeyError, TypeError, ValueError):
+                continue
+        doc["text"] = clean
+    if isinstance(body.get("sfx"), list):
+        clean = []
+        for ev in body["sfx"]:
+            try:
+                item = dict(ev)
+                item["at"] = round(float(ev["at"]), 3)
+                item["file"] = str(ev.get("file", ""))
+                clean.append(item)
+            except (KeyError, TypeError, ValueError):
+                continue
+        doc["sfx"] = clean
+    if isinstance(body.get("fx"), list):
+        clean = []
+        for ev in body["fx"]:
+            try:
+                item = dict(ev)
+                item["in"] = round(float(ev["in"]), 3)
+                item["out"] = round(float(ev["out"]), 3)
+                item["kind"] = str(ev.get("kind", "card"))
+                clean.append(item)
+            except (KeyError, TypeError, ValueError):
+                continue
+        doc["fx"] = clean
+    doc.setdefault("keeps", [])
     doc.setdefault("text", [])
     doc.setdefault("sfx", [])
+    doc.setdefault("fx", [])
     doc["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
     doc["by"] = "butacut-ui"
     fd, tmp = tempfile.mkstemp(dir=str(p.parent), suffix=".tmp")
@@ -215,6 +265,8 @@ def discover_videos():
     for d in media_dirs():
         for f in sorted(d.iterdir()):
             if f.suffix.lower() not in VIDEO_EXTS or f.stem.endswith("-cut"):
+                continue
+            if ONLY is not None and os.path.normpath(str(f)) != os.path.normpath(str(ONLY)):
                 continue
             rp = f.resolve()
             if rp in seen:
@@ -387,6 +439,19 @@ def _apply_job(vid, video):
 # ------------------------------------------------------------------ handler
 
 CTYPES = {".mp4": "video/mp4", ".m4v": "video/mp4", ".mov": "video/quicktime"}
+ASSET_CTYPES = {".mp3": "audio/mpeg", ".wav": "audio/wav", ".m4a": "audio/mp4",
+                ".aac": "audio/aac", ".png": "image/png", ".jpg": "image/jpeg",
+                ".jpeg": "image/jpeg", ".webp": "image/webp", ".gif": "image/gif"}
+
+
+def resolve_asset(rel):
+    norm = os.path.normpath(rel).replace("\\", "/")
+    if norm.startswith("..") or os.path.isabs(norm):
+        raise FileNotFoundError(rel)
+    p = ROOT / norm
+    if p.suffix.lower() not in ASSET_CTYPES or not p.exists():
+        raise FileNotFoundError(rel)
+    return p
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -468,7 +533,8 @@ class Handler(BaseHTTPRequestHandler):
             elif route == "/api/videos":
                 self._json(discover_videos())
             elif route == "/api/config":
-                self._json({"renderer": "custom" if CONFIG.get("render_cmd") else "built-in"})
+                self._json({"renderer": "custom" if CONFIG.get("render_cmd") else "built-in",
+                            "agent_prompt": CONFIG.get("agent_prompt")})
             elif route == "/api/video":
                 video = resolve_id(self._qs()["id"])
                 dur = get_duration(video)
@@ -479,6 +545,9 @@ class Handler(BaseHTTPRequestHandler):
                     "duration": dur,
                     "edit": edit, "edit_mtime": mtime, "edit_valid": valid,
                     "clips": (bdoc or {}).get("clips", []),
+                    "abs_video": str(video),
+                    "abs_edit": str(edit_path(video)),
+                    "abs_output": str(video.with_name(video.stem + "-cut.mp4")),
                 })
             elif route == "/api/poll":
                 video = resolve_id(self._qs()["id"])
@@ -492,6 +561,9 @@ class Handler(BaseHTTPRequestHandler):
                 self._file(get_strip(resolve_id(self._qs()["id"])), "image/jpeg", cache=True)
             elif route == "/api/applystatus":
                 self._json(_jobs.get(self._qs().get("id", ""), {"status": "idle"}))
+            elif route.startswith("/asset/"):
+                ap = resolve_asset(unquote(route[len("/asset/"):]))
+                self._file(ap, ASSET_CTYPES[ap.suffix.lower()], cache=True)
             elif route.startswith("/media/"):
                 self._range_file(resolve_id(unquote(route[len("/media/"):])))
             else:
@@ -507,8 +579,24 @@ class Handler(BaseHTTPRequestHandler):
             body = self._body()
             if route == "/api/edit":
                 video = resolve_id(body["id"])
-                mtime = save_keeps(video, body.get("keeps", []), get_duration(video))
+                mtime = save_edit(video, body, get_duration(video))
                 self._json({"ok": True, "saved": time.strftime("%H:%M:%S"), "mtime": mtime})
+            elif route == "/api/reveal":
+                rel = os.path.normpath(str(body.get("path", "")))
+                if rel.startswith("..") or os.path.isabs(rel):
+                    self._json({"error": "bad path"}, 400)
+                    return
+                target = ROOT / rel
+                if not target.exists():
+                    self._json({"error": "not found"}, 404)
+                    return
+                if sys.platform == "darwin":
+                    subprocess.run(["open", "-R", str(target)])
+                elif os.name == "nt":
+                    subprocess.run(["explorer", "/select,", str(target)])
+                else:
+                    subprocess.run(["xdg-open", str(target.parent)])
+                self._json({"ok": True})
             elif route == "/api/apply":
                 vid = body["id"]
                 video = resolve_id(vid)
@@ -538,8 +626,15 @@ def main():
     except Exception as exc:
         vids = []
         print("WARN: discovery failed: %s" % exc)
-    server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    try:
+        server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    except OSError:
+        print("ERROR: port %d is already in use - another ButaCut is probably running." % port)
+        print("Close the other one (or change \"port\" in butacut.config.json) and try again.")
+        sys.exit(1)
     print("ButaCut  http://127.0.0.1:%d" % port)
+    if ONLY is not None:
+        print("  single-project mode: %s" % ONLY)
     print("  python: %s" % sys.executable)
     print("  ffmpeg: %s" % FFMPEG)
     print("  media dirs: %s" % ", ".join(str(d) for d in media_dirs()))

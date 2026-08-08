@@ -1,4 +1,8 @@
 {
-  "media_dirs": ["footage", "outputs"],
-  "port": 8766
+  "media_dirs": [
+    "footage",
+    "outputs"
+  ],
+  "port": 8766,
+  "agent_prompt": "Finish my edit and give me the final video.\n\nEdit file:    {edit}\nSource video: {video}\nOutput:       {output}\n\nThe edit file follows butacut/edit-contract.md (keeps/text/sfx/fx, all in SOURCE-video\nseconds; section 6 = the house defaults). Use the tools in tools/ (see AGENTS.md):\ncut the keeps, make and burn the subtitles, and save the finished video to the output\npath above. Then open the finished file so I can watch it."
 }
