@@ -1,0 +1,14 @@
+# Never commit secrets
+.env
+
+# Generated files
+outputs/*
+!outputs/.gitkeep
+__pycache__/
+*.pyc
+
+# ButaCut cache (waveforms/thumbnails)
+butacut/cache/
+
+# NOTE: assets/ and footage/ are deliberately NOT ignored — the fonts and the
+# sample video must travel with this repo or nothing renders.

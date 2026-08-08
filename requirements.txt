@@ -1,0 +1,9 @@
+# Workshop core dependencies — keep this list tiny.
+python-dotenv>=1.0
+pythainlp>=5.0
+
+# NOT listed on purpose:
+#   faster-whisper — only needed for --backend local transcription; it pulls a
+#     large model download on first run. transcribe.py prints the install
+#     command if you ask for local mode.
+#   imageio-ffmpeg — NEVER install this; its ffmpeg build cannot burn subtitles.
