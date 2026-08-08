@@ -2,115 +2,199 @@
   "version": 1,
   "video": "sample-talk.mp4",
   "fps": 24,
-  "duration": 24.833,
+  "duration": 39.1,
   "keeps": [
     {
-      "in": 1.15,
-      "out": 5.304,
+      "in": 0.0,
+      "out": 5.417,
       "origin": "silence_cut"
     },
     {
-      "in": 5.43,
-      "out": 7.834,
+      "in": 6.094,
+      "out": 9.86,
       "origin": "silence_cut"
     },
     {
-      "in": 8.0,
-      "out": 12.775,
+      "in": 12.712,
+      "out": 16.475,
       "origin": "silence_cut"
     },
     {
-      "in": 14.34,
-      "out": 18.44,
+      "in": 16.517,
+      "out": 18.576,
       "origin": "silence_cut"
     },
     {
-      "in": 18.825,
-      "out": 23.97,
+      "in": 20.062,
+      "out": 22.627,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 22.745,
+      "out": 25.315,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 25.591,
+      "out": 27.64,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 27.703,
+      "out": 29.79,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 30.165,
+      "out": 30.765,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 30.949,
+      "out": 36.062,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 36.98,
+      "out": 39.1,
       "origin": "silence_cut"
     }
   ],
   "text": [
     {
-      "in": 1.15,
-      "out": 2.47,
-      "content": "ก่อนที่เราจะส่งงาน",
+      "in": 0.0,
+      "out": 0.76,
+      "content": "สวัสดีครับ",
       "origin": "subtitles"
     },
     {
-      "in": 2.51,
-      "out": 3.57,
-      "content": "ให้อาจารย์ดู",
+      "in": 1.7,
+      "out": 1.84,
+      "content": "เด",
       "origin": "subtitles"
     },
     {
-      "in": 3.93,
-      "out": 5.11,
-      "content": "หรือส่งใบสมัคร",
+      "in": 1.88,
+      "out": 2.64,
+      "content": "ี๋ยววันนี้ผมจะมา",
       "origin": "subtitles"
     },
     {
-      "in": 5.616,
-      "out": 7.356,
-      "content": "หรืองานอะไรที่สำคัญๆ",
+      "in": 2.68,
+      "out": 4.02,
+      "content": "สอนคุณใช้ AI",
       "origin": "subtitles"
     },
     {
-      "in": 8.182,
-      "out": 10.822,
-      "content": "ลองใช้เวลาสักนิดนึงให้ AI",
+      "in": 4.26,
+      "out": 5.16,
+      "content": "ตัดคลิปครับ",
       "origin": "subtitles"
     },
     {
-      "in": 11.022,
-      "out": 11.882,
-      "content": "มันไป Feedback",
+      "in": 5.38,
+      "out": 6.437,
+      "content": "สิ่",
       "origin": "subtitles"
     },
     {
-      "in": 11.922,
-      "out": 12.582,
-      "content": "เราก่อน",
+      "in": 6.477,
+      "out": 7.417,
+      "content": "งที่ AI",
       "origin": "subtitles"
     },
     {
-      "in": 14.507,
-      "out": 17.367,
-      "content": "อย่างเช่นวิเคราะห์จุดอ่อนชัดเจน",
+      "in": 7.477,
+      "out": 9.677,
+      "content": "ตัดได้ก็คือช่วงเงียบ",
       "origin": "subtitles"
     },
     {
-      "in": 17.407,
-      "out": 18.287,
-      "content": "3 จุด",
+      "in": 12.869,
+      "out": 13.419,
+      "content": "และ",
       "origin": "subtitles"
     },
     {
-      "in": 19.012,
-      "out": 20.972,
-      "content": "และบอกวิธีทำให้ผลงาน",
+      "in": 13.589,
+      "out": 14.139,
+      "content": "และ",
       "origin": "subtitles"
     },
     {
-      "in": 21.012,
-      "out": 22.272,
-      "content": "นี้ดีขึ้นใน",
+      "in": 14.409,
+      "out": 14.959,
+      "content": "และ",
       "origin": "subtitles"
     },
     {
-      "in": 22.312,
-      "out": 23.072,
-      "content": "1 Step",
+      "in": 15.349,
+      "out": 15.899,
+      "content": "และ",
       "origin": "subtitles"
     },
     {
-      "in": 23.132,
-      "out": 23.732,
-      "content": "สั้นๆ",
+      "in": 16.571,
+      "out": 17.231,
+      "content": "การพูดผิด",
+      "origin": "subtitles"
+    },
+    {
+      "in": 17.271,
+      "out": 18.211,
+      "content": "หรือพูดซ้ำ",
+      "origin": "subtitles"
+    },
+    {
+      "in": 20.177,
+      "out": 21.137,
+      "content": "AI สามารถ",
+      "origin": "subtitles"
+    },
+    {
+      "in": 21.177,
+      "out": 23.275,
+      "content": "Zoom InZ",
+      "origin": "subtitles"
+    },
+    {
+      "in": 23.315,
+      "out": 23.955,
+      "content": "oom Out",
+      "origin": "subtitles"
+    },
+    {
+      "in": 25.631,
+      "out": 26.571,
+      "content": "ทำ Whoosh",
+      "origin": "subtitles"
+    },
+    {
+      "in": 27.774,
+      "out": 28.854,
+      "content": "ทำ Sound Effect",
+      "origin": "subtitles"
+    },
+    {
+      "in": 30.993,
+      "out": 32.193,
+      "content": "หรือทำ Pop Up",
+      "origin": "subtitles"
+    },
+    {
+      "in": 33.913,
+      "out": 35.413,
+      "content": "ทำได้หมดเลยครับ",
+      "origin": "subtitles"
+    },
+    {
+      "in": 37.211,
+      "out": 37.811,
+      "content": "บ๊ายบาย",
       "origin": "subtitles"
     }
   ],
   "sfx": [],
-  "updated": "2026-08-08T17:24:36",
+  "updated": "2026-08-09T06:48:05",
   "by": "make_subtitles"
 }

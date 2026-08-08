@@ -201,6 +201,30 @@ def _now_iso() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
+# Quiet studio mics sit near silence at 0.005; phone/webcam mics have a much
+# louder noise floor and need 0.02-0.04 before pauses register at all.
+AUTO_THRESHOLDS = [0.005, 0.01, 0.02, 0.04]
+MIN_SILENCE_FRACTION = 0.08  # a threshold "works" once >=8% of the clip is silence
+
+
+def auto_detect_silences(
+    clip_path: Path, duration: float, min_silence: float
+) -> tuple[list[tuple[float, float]], float]:
+    """Try quiet-mic thresholds first, escalating until real pauses appear.
+
+    Returns (silences, threshold_used). If no threshold finds meaningful
+    silence, returns the last attempt (possibly empty) — the caller keeps
+    the clip uncut rather than chopping speech.
+    """
+    silences: list[tuple[float, float]] = []
+    for threshold in AUTO_THRESHOLDS:
+        silences = detect_silences(clip_path, _amplitude_to_db(threshold), min_silence)
+        fraction = sum(e - s for s, e in silences) / duration if duration else 0.0
+        if fraction >= MIN_SILENCE_FRACTION:
+            return silences, threshold
+    return silences, AUTO_THRESHOLDS[-1]
+
+
 def main() -> None:
     setup_console()
     parser = argparse.ArgumentParser(
@@ -213,10 +237,10 @@ def main() -> None:
     parser.add_argument("--margin", type=float, default=0.3,
                         help="Seconds of breathing room kept around each spoken "
                              "part (default 0.3; smaller = tighter cut)")
-    parser.add_argument("--threshold", type=float, default=0.005,
+    parser.add_argument("--threshold", type=float, default=None,
                         help="Loudness (0.0-1.0) below which audio counts as "
-                             "silence (default 0.005; raise if background noise "
-                             "stops silences being detected)")
+                             "silence. Default: auto — tries quiet-mic levels "
+                             "first, then escalates for noisy phone/webcam mics")
     parser.add_argument("--min-silence", type=float, default=0.3,
                         help="Ignore silences shorter than this many seconds "
                              "(default 0.3)")
@@ -237,7 +261,6 @@ def main() -> None:
         output = OUTPUTS_DIR / f"{args.inputs[0].stem}-cut.mp4"
     output.parent.mkdir(parents=True, exist_ok=True)
 
-    noise_db = _amplitude_to_db(args.threshold)
     total_in = 0.0
     total_kept = 0.0
     edit_paths: list[Path] = []
@@ -249,7 +272,13 @@ def main() -> None:
             duration = get_duration(clip)
             total_in += duration
             print(f"[..] {clip.name}: {duration:.1f}s, detecting silences...")
-            silences = detect_silences(clip, noise_db, args.min_silence)
+            if args.threshold is None:
+                silences, used = auto_detect_silences(clip, duration, args.min_silence)
+                print(f"[..] {clip.name}: auto threshold -> {used}")
+            else:
+                silences = detect_silences(
+                    clip, _amplitude_to_db(args.threshold), args.min_silence
+                )
             keeps = compute_keep_ranges(duration, silences, args.margin)
             keeps = filter_keep_ranges(keeps, args.min_speech)
             if not keeps:

@@ -17,7 +17,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import get_ffprobe, run, setup_console
-from cut_silences import _amplitude_to_db, compute_keep_ranges, detect_silences, get_duration
+from cut_silences import (
+    _amplitude_to_db,
+    auto_detect_silences,
+    compute_keep_ranges,
+    detect_silences,
+    get_duration,
+)
 
 
 def probe(video: Path) -> dict:
@@ -36,8 +42,9 @@ def main() -> None:
     setup_console()
     parser = argparse.ArgumentParser(description="Show what's inside a video file.")
     parser.add_argument("video", type=Path)
-    parser.add_argument("--threshold", type=float, default=0.005,
-                        help="Silence loudness threshold (same as cut_silences.py)")
+    parser.add_argument("--threshold", type=float, default=None,
+                        help="Silence loudness threshold (default: auto, same "
+                             "as cut_silences.py)")
     parser.add_argument("--min-silence", type=float, default=0.3)
     args = parser.parse_args()
 
@@ -68,8 +75,12 @@ def main() -> None:
                   f"{s.get('sample_rate')} Hz, {s.get('channels')} channel(s)")
 
     print("[..] detecting silences...")
-    silences = detect_silences(args.video, _amplitude_to_db(args.threshold),
-                               args.min_silence)
+    if args.threshold is None:
+        silences, used = auto_detect_silences(args.video, duration, args.min_silence)
+        print(f"[..] auto threshold -> {used}")
+    else:
+        silences = detect_silences(args.video, _amplitude_to_db(args.threshold),
+                                   args.min_silence)
     total_silence = sum(e - s for s, e in silences)
     keeps = compute_keep_ranges(duration, silences, margin=0.0)
     print(f"silences:  {len(silences)} "
