@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "video": "sample-talk.mp4",
+  "fps": 24,
+  "duration": 24.833,
+  "keeps": [
+    {
+      "in": 1.15,
+      "out": 5.304,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 5.43,
+      "out": 7.834,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 8.0,
+      "out": 12.775,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 14.34,
+      "out": 18.44,
+      "origin": "silence_cut"
+    },
+    {
+      "in": 18.825,
+      "out": 23.97,
+      "origin": "silence_cut"
+    }
+  ],
+  "text": [
+    {
+      "in": 1.15,
+      "out": 2.47,
+      "content": "ก่อนที่เราจะส่งงาน",
+      "origin": "subtitles"
+    },
+    {
+      "in": 2.51,
+      "out": 3.57,
+      "content": "ให้อาจารย์ดู",
+      "origin": "subtitles"
+    },
+    {
+      "in": 3.93,
+      "out": 5.11,
+      "content": "หรือส่งใบสมัคร",
+      "origin": "subtitles"
+    },
+    {
+      "in": 5.616,
+      "out": 7.356,
+      "content": "หรืองานอะไรที่สำคัญๆ",
+      "origin": "subtitles"
+    },
+    {
+      "in": 8.182,
+      "out": 10.822,
+      "content": "ลองใช้เวลาสักนิดนึงให้ AI",
+      "origin": "subtitles"
+    },
+    {
+      "in": 11.022,
+      "out": 11.882,
+      "content": "มันไป Feedback",
+      "origin": "subtitles"
+    },
+    {
+      "in": 11.922,
+      "out": 12.582,
+      "content": "เราก่อน",
+      "origin": "subtitles"
+    },
+    {
+      "in": 14.507,
+      "out": 17.367,
+      "content": "อย่างเช่นวิเคราะห์จุดอ่อนชัดเจน",
+      "origin": "subtitles"
+    },
+    {
+      "in": 17.407,
+      "out": 18.287,
+      "content": "3 จุด",
+      "origin": "subtitles"
+    },
+    {
+      "in": 19.012,
+      "out": 20.972,
+      "content": "และบอกวิธีทำให้ผลงาน",
+      "origin": "subtitles"
+    },
+    {
+      "in": 21.012,
+      "out": 22.272,
+      "content": "นี้ดีขึ้นใน",
+      "origin": "subtitles"
+    },
+    {
+      "in": 22.312,
+      "out": 23.072,
+      "content": "1 Step",
+      "origin": "subtitles"
+    },
+    {
+      "in": 23.132,
+      "out": 23.732,
+      "content": "สั้นๆ",
+      "origin": "subtitles"
+    }
+  ],
+  "sfx": [],
+  "updated": "2026-08-08T17:24:36",
+  "by": "make_subtitles"
+}

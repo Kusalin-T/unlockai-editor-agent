@@ -393,34 +393,82 @@ def write_ass_file(
     return out_path, chunk_list
 
 
-# ── edit.json update (ButaCut timeline) ─────────────────────────────────────
+# ── edit.json update (ButaCut timeline, edit-contract v1) ───────────────────
+
+
+def _find_source_for_cut(cut_video: Path) -> Path | None:
+    """`sample-talk-cut.mp4` came from `sample-talk.<ext>` — find that source
+    (it holds the ButaCut sidecar with the keeps). Searches the cut video's
+    own folder, then footage/, then the repo root."""
+    from _common import FOOTAGE_DIR, REPO_ROOT
+    if not cut_video.stem.endswith("-cut"):
+        return None
+    stem = cut_video.stem[: -len("-cut")]
+    for folder in (cut_video.parent, FOOTAGE_DIR, REPO_ROOT):
+        for ext in (".mp4", ".mov", ".m4v", ".MP4", ".MOV"):
+            cand = folder / f"{stem}{ext}"
+            if cand.exists():
+                return cand
+    return None
+
+
+def _cut_time_to_source_time(t: float, keeps: list[dict]) -> float:
+    """Map a timestamp on the CUT video's timeline back to source seconds,
+    using the keep ranges that produced the cut."""
+    acc = 0.0
+    for k in keeps:
+        length = float(k["out"]) - float(k["in"])
+        if t <= acc + length:
+            return float(k["in"]) + (t - acc)
+        acc += length
+    return float(keeps[-1]["out"]) if keeps else t
 
 
 def update_edit_json_text(video: Path, chunks: list[Chunk], ass_path: Path) -> Path | None:
-    """If an edit.json project file sits next to the video, write the subtitle
-    chunks into its `text` track so ButaCut displays them."""
-    edit_path = video.with_name(video.stem + ".edit.json")
-    if not edit_path.exists():
-        return None
-    try:
-        doc = json.loads(edit_path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return None
-    if not isinstance(doc, dict):
-        return None
-    doc["text"] = [
-        {
-            "start": round(c.start, 3),
-            "end": round(c.end, 3),
-            "text": c.text,
-            "origin": "subtitles",
-            "asset": ass_path.name,
-        }
-        for c in chunks
-    ]
-    edit_path.write_text(
-        json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    """Write the subtitle chunks into the ButaCut sidecar's `text` track
+    (contract v1: entries are {in, out, content, origin} in SOURCE seconds).
+
+    If `video` is a `-cut` render, times are mapped back through the source
+    sidecar's keeps so the text lands on the source timeline. Otherwise the
+    sidecar sits next to `video` itself.
+    """
+    import time as _time
+    from _common import edit_sidecar, read_json_tolerant, write_json_atomic
+
+    target_video = video
+    keeps: list[dict] = []
+    source = _find_source_for_cut(video)
+    if source is not None:
+        doc = read_json_tolerant(edit_sidecar(source))
+        if doc and doc.get("keeps"):
+            target_video = source
+            keeps = doc["keeps"]
+
+    edit_path = edit_sidecar(target_video)
+    doc = read_json_tolerant(edit_path) or {}
+    doc.setdefault("version", 1)
+    doc.setdefault("video", target_video.name)
+    doc.setdefault("keeps", [])
+    doc.setdefault("sfx", [])
+    if keeps:
+        doc["text"] = [
+            {
+                "in": round(_cut_time_to_source_time(c.start, keeps), 3),
+                "out": round(_cut_time_to_source_time(c.end, keeps), 3),
+                "content": c.text,
+                "origin": "subtitles",
+            }
+            for c in chunks
+        ]
+    else:
+        doc["text"] = [
+            {"in": round(c.start, 3), "out": round(c.end, 3),
+             "content": c.text, "origin": "subtitles"}
+            for c in chunks
+        ]
+    doc["updated"] = _time.strftime("%Y-%m-%dT%H:%M:%S")
+    doc["by"] = "make_subtitles"
+    write_json_atomic(edit_path, doc)
     return edit_path
 
 

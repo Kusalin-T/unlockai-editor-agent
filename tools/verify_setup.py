@@ -135,6 +135,46 @@ def check_api_key() -> None:
              ".env to use the fast cloud mode")
 
 
+def check_butacut() -> None:
+    serve = REPO_ROOT / "butacut" / "serve.py"
+    app = REPO_ROOT / "butacut" / "app.html"
+    if not (serve.exists() and app.exists()):
+        fail("ButaCut timeline UI files missing (butacut/)",
+             "re-download the workshop folder")
+        return
+    import subprocess
+    import urllib.request
+    url = "http://127.0.0.1:8766/api/config"
+    try:
+        with urllib.request.urlopen(url, timeout=2) as resp:
+            resp.read()
+        ok("ButaCut timeline reachable", "already running on port 8766")
+        return
+    except OSError:
+        pass
+    proc = subprocess.Popen(
+        [sys.executable, str(serve)], cwd=str(REPO_ROOT),
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    try:
+        import time
+        for _ in range(20):
+            time.sleep(0.25)
+            try:
+                with urllib.request.urlopen(url, timeout=2) as resp:
+                    resp.read()
+                ok("ButaCut timeline starts", "python butacut/serve.py -> port 8766")
+                return
+            except OSError:
+                if proc.poll() is not None:
+                    break
+        fail("ButaCut timeline did not start",
+             "run 'python butacut/serve.py' yourself and read the error")
+    finally:
+        if proc.poll() is None:
+            proc.terminate()
+
+
 def check_smoke_render(ffmpeg_ok: bool) -> None:
     if not ffmpeg_ok or not SAMPLE.exists():
         print("[SKIP] smoke render (fix the failures above first)")
@@ -189,6 +229,7 @@ def main() -> None:
     check_fonts()
     check_sample()
     check_api_key()
+    check_butacut()
     check_smoke_render(bool(ffmpeg) and libass_ok)
     print("-" * 60)
     if hard_failures:

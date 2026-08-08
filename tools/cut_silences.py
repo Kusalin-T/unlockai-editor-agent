@@ -166,37 +166,39 @@ def _concat_with_ffmpeg(clip_paths: list[Path], output_path: Path) -> None:
 
 
 def write_edit_json(
-    output_path: Path,
     source: Path,
     keeps: list[tuple[float, float]],
     fps: int,
+    duration: float,
 ) -> Path:
     """
-    Write/update the edit.json project file next to the output video.
-
-    ButaCut (the timeline UI) watches this file — every keep range shows up
-    as a segment on the timeline. Preserves existing text/sfx tracks if the
-    file already exists.
+    Write/update the ButaCut edit.json sidecar NEXT TO THE SOURCE video
+    (per the ButaCut edit-contract v1). Keep ranges are in source seconds.
+    ButaCut watches this file — the timeline updates live. Preserves any
+    existing text/sfx tracks; write is atomic.
     """
-    edit_path = output_path.with_name(output_path.stem + ".edit.json")
-    doc = {"source": "", "fps": fps, "keeps": [], "text": [], "sfx": []}
-    if edit_path.exists():
-        try:
-            existing = json.loads(edit_path.read_text(encoding="utf-8"))
-            if isinstance(existing, dict):
-                doc.update({k: existing[k] for k in ("text", "sfx") if k in existing})
-        except (json.JSONDecodeError, OSError):
-            pass
-    doc["source"] = source.resolve().as_posix()
+    from _common import edit_sidecar, read_json_tolerant, write_json_atomic
+    edit_path = edit_sidecar(source)
+    doc = read_json_tolerant(edit_path) or {}
+    doc["version"] = 1
+    doc["video"] = source.name
     doc["fps"] = fps
+    doc["duration"] = round(duration, 3)
     doc["keeps"] = [
         {"in": round(s, 3), "out": round(e, 3), "origin": "silence_cut"}
         for s, e in keeps
     ]
-    edit_path.write_text(
-        json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    doc.setdefault("text", [])
+    doc.setdefault("sfx", [])
+    doc["updated"] = _now_iso()
+    doc["by"] = "cut_silences"
+    write_json_atomic(edit_path, doc)
     return edit_path
+
+
+def _now_iso() -> str:
+    import time
+    return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def main() -> None:
@@ -238,12 +240,11 @@ def main() -> None:
     noise_db = _amplitude_to_db(args.threshold)
     total_in = 0.0
     total_kept = 0.0
-    all_keeps_for_edit: list[tuple[float, float]] = []
+    edit_paths: list[Path] = []
 
     with tempfile.TemporaryDirectory(prefix="cut-") as tmp:
         tmp_dir = Path(tmp)
         cut_clips: list[Path] = []
-        out_cursor = 0.0
         for i, clip in enumerate(args.inputs):
             duration = get_duration(clip)
             total_in += duration
@@ -261,13 +262,8 @@ def main() -> None:
             out = tmp_dir / f"cut-{i:03d}.mp4"
             _silence_cut_one(clip, out, keeps)
             cut_clips.append(out)
-            if len(args.inputs) == 1:
-                # Single input: edit.json keeps refer to the source timeline.
-                all_keeps_for_edit = keeps
-            else:
-                # Multiple inputs: keeps refer to the combined output timeline.
-                all_keeps_for_edit.append((out_cursor, out_cursor + kept))
-                out_cursor += kept
+            # ButaCut sidecar next to each source (keeps in source seconds).
+            edit_paths.append(write_edit_json(clip, keeps, args.fps, duration))
 
         if not cut_clips:
             print("[FAIL] no speech found in any input")
@@ -275,12 +271,10 @@ def main() -> None:
 
         _concat_with_ffmpeg(cut_clips, output)
 
-    source_for_edit = args.inputs[0] if len(args.inputs) == 1 else output
-    edit_path = write_edit_json(output, source_for_edit, all_keeps_for_edit, args.fps)
-
     removed = total_in - total_kept
     print(f"[OK] wrote {output}")
-    print(f"[OK] project file {edit_path.name} updated (ButaCut will show the cuts)")
+    for p in edit_paths:
+        print(f"[OK] project file {p} updated (watch the ButaCut timeline)")
     print(f"[OK] removed {removed:.1f}s of silence "
           f"({total_in:.1f}s -> {total_kept:.1f}s)")
 

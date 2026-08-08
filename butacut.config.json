@@ -1,0 +1,4 @@
+{
+  "media_dirs": ["footage", "outputs"],
+  "port": 8766
+}

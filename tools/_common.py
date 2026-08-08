@@ -138,6 +138,34 @@ def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, **kwargs)
 
 
+def write_json_atomic(path: Path, doc: dict) -> None:
+    """Write JSON atomically (temp file + rename) — required by the ButaCut
+    edit-contract so the UI never sees a half-written file."""
+    import json
+    import tempfile
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), suffix=".tmp")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+
+def read_json_tolerant(path: Path) -> dict | None:
+    """Read JSON, returning None on missing/invalid/mid-write files."""
+    import json
+    if not path.exists():
+        return None
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        return doc if isinstance(doc, dict) else None
+    except (OSError, ValueError):
+        return None
+
+
+def edit_sidecar(video: Path) -> Path:
+    """The ButaCut edit.json sidecar path for a video (same dir, same stem)."""
+    return video.with_name(video.stem + ".edit.json")
+
+
 def load_env() -> None:
     """Load .env from the repo root. Works even if python-dotenv is missing."""
     try:

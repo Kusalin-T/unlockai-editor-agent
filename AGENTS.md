@@ -39,13 +39,29 @@ The student is **learning by composing these tools themselves**. So:
 
 ## The live timeline (ButaCut)
 
-The student has a timeline UI open in their browser (ButaCut). It watches the
-project file `outputs/<video>.edit.json` — **whenever you cut or add
-subtitles, the tools update that file and the student's screen updates
-live**. That's the magic moment of this workshop; mention it ("watch your
-timeline") when you run a cutting or subtitle step. If you modify
-`edit.json` yourself, keep its shape: `{source, fps, keeps:[{in, out,
-origin}], text:[...], sfx:[...]}` and write it atomically (full valid JSON).
+The student watches a timeline UI in their browser. Start it with:
+
+    python butacut/serve.py        (run from this folder; then open http://127.0.0.1:8766)
+
+ButaCut shows every video in `footage/` and `outputs/` and watches each
+video's sidecar file `<video-stem>.edit.json` (same folder as the video).
+**When you cut or add subtitles, the tools update that sidecar and the
+student's screen updates live** — that's the magic moment of this workshop;
+say "watch your timeline" when you run a cutting or subtitle step. The
+student can also drag the cut points in the UI; the file changes under you,
+and that's normal — re-read it before you write.
+
+Sidecar shape (full contract: `butacut/edit-contract.md`): all times are
+SOURCE-video seconds; write atomically (temp file + rename):
+
+    {"version": 1, "video": "<basename>", "fps": 24, "duration": 63.2,
+     "keeps": [{"in": 0.0, "out": 11.86, "origin": "silence_cut"}],
+     "text":  [{"in": 3.2, "out": 5.6, "content": "สวัสดี", "origin": "subtitles"}],
+     "sfx":   [], "updated": "...", "by": "..."}
+
+The tools do this for you: `cut_silences.py` writes the keeps next to each
+source clip; `make_subtitles.py --video <cut video>` maps subtitle times
+back to the source timeline and fills the `text` track.
 
 ## Practical notes
 
