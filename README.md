@@ -18,9 +18,19 @@ This is the student kit for the **UnlockAI: Editor Agent** workshop by
 You are setting up my computer for a video-editing workshop. Do everything
 yourself; only ask me when you need a choice or a password. Steps:
 
-1. Detect my operating system.
+1. Detect my operating system, then check the package manager exists:
+   - Mac: if "brew" is missing, install Homebrew with its official
+     installer script (it will ask for my password), then activate it:
+     eval "$(/opt/homebrew/bin/brew shellenv)"
+   - Windows: if "winget" is missing, open the Microsoft Store page
+     ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1 for me to install
+     "App Installer", then use a NEW terminal.
+   If bootstrapping fails, read
+   https://raw.githubusercontent.com/Kusalin-T/unlockai-editor-agent/main/SETUP-HELP.md
+   and follow its direct-download fallbacks; as a last resort open the
+   relevant download page in my browser so I can install it by hand.
 2. Make sure real ffmpeg is installed:
-   - Mac: brew install ffmpeg  (install Homebrew first if missing)
+   - Mac: brew install ffmpeg
    - Windows: winget install Gyan.FFmpeg
    Never install imageio-ffmpeg or any "python ffmpeg" package — those
    builds cannot burn subtitles. After installing, use a fresh shell so

@@ -32,7 +32,8 @@ def setup_console() -> None:
 
 
 def _windows_extra_dirs() -> list[Path]:
-    """Places winget puts ffmpeg that may not be on PATH in the current shell."""
+    """Places ffmpeg lands on Windows that may not be on PATH in this shell:
+    winget installs, and the manual-download fallback (C:\\ffmpeg\\bin)."""
     dirs: list[Path] = []
     local = os.environ.get("LOCALAPPDATA")
     if local:
@@ -41,6 +42,7 @@ def _windows_extra_dirs() -> list[Path]:
         if pkgs.is_dir():
             for pkg in pkgs.glob("Gyan.FFmpeg*"):
                 dirs.extend(pkg.glob("ffmpeg-*/bin"))
+    dirs.append(Path("C:/ffmpeg/bin"))
     return dirs
 
 

@@ -74,6 +74,10 @@ back to the source timeline and fills the `text` track.
   Real ffmpeg comes from `brew install ffmpeg` (Mac) or
   `winget install Gyan.FFmpeg` (Windows). After installing, open a fresh
   terminal so PATH updates.
+- Missing `brew`/`winget`, or an install keeps failing? Follow
+  `SETUP-HELP.md` in this folder — it has the package-manager bootstrap
+  steps and direct-download fallbacks (including `C:\ffmpeg\bin`, which
+  the tools check automatically).
 - Windows: keep file paths simple (no Thai characters in folder names), and
   don't worry about backslashes — the tools handle path conversion.
 - The transcript JSON shape: `{language, duration, segments:[{start, end,
