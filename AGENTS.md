@@ -83,7 +83,12 @@ back to the source timeline and fills the `text` track.
   libraries and are immune to this. Tell the student a macOS Software
   Update would fix Homebrew for good.
 - Transcription needs `GROQ_API_KEY` in `.env` (class key from the
-  instructor). No key → `--backend local` works offline but is slower and
+  instructor).
+- **Never ask the student to paste the API key into the chat.** Open `.env`
+  in a plain text editor for them (Windows: `notepad .env` / Mac:
+  `open -e .env`), tell them to paste the key after `GROQ_API_KEY=` and
+  save, wait for them to say "done", then read `.env` to confirm a key
+  starting with `gsk_` is present before continuing. No key → `--backend local` works offline but is slower and
   needs `pip install faster-whisper` plus a model download.
 - Thai fonts are bundled in `assets/fonts/` — burning subtitles needs no
   system fonts. Never delete that folder.

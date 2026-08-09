@@ -43,8 +43,13 @@ yourself; only ask me when you need a choice or a password. Steps:
    (Documents/butabuilds-workshop-editor — the folder this session is
    already working in). No extra nested folder. Work here from now on.
 5. Install the Python packages: python -m pip install -r requirements.txt
-6. Copy .env.example to .env and put in the API key I give you
-   (GROQ_API_KEY=...). Ask me for the key now.
+6. Copy .env.example to .env, then OPEN the .env file for me in a
+   simple text editor (Windows: notepad .env / Mac: open -e .env).
+   Do NOT ask me to paste the key into this chat. I will paste it into
+   the file myself, right after GROQ_API_KEY=, and save. Tell me when
+   the editor is open, then WAIT until I say "done". After I say done,
+   read .env and confirm a key is present (it starts with gsk_) —
+   if it's missing, reopen the file and wait again.
 7. Run: python tools/verify_setup.py — and fix anything that fails.
 8. Start the timeline UI in the background: python butacut/serve.py
    — then open http://127.0.0.1:8766 in my default browser.
