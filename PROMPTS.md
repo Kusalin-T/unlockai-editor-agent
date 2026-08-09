@@ -53,10 +53,6 @@ browser. If it asks questions, answer yes.
 
 ## Level up (free-experiment block)
 
-**Prompt 11 — Phrase subtitles (classic look)**
-*(bursts are the default — use this if you prefer readable lines.)*
-> Remake my subtitles as normal readable phrases instead of one-word bursts — run the subtitles tool with --style plain, then burn a new video. Keep the Thai-aware line breaks (the tool handles them), update the project file so I can adjust the phrases in ButaCut, and give me the new file.
-
 **Prompt 13 — Finish**
 Click **Apply cut** in ButaCut → it shows a prompt written for your project →
 copy it → paste it to your agent. It renders the final video and opens it.
