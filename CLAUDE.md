@@ -8,7 +8,8 @@ talking-head video on their own laptop. This folder is their workshop kit.
 A set of small, pre-tested command-line tools. Each does ONE editing job.
 There is no fixed pipeline — the student decides what to do, you pick the
 right tool and run it. Run every tool with the `python` interpreter that is
-on PATH (on Windows there is no `python3` command).
+on PATH (on Windows there is no `python3` command) — but see the interpreter
+rule in Practical notes if that interpreter or its pip misbehaves.
 
 ## The tools (in `tools/`)
 
@@ -65,6 +66,15 @@ back to the source timeline and fills the `text` track.
 
 ## Practical notes
 
+- **If the Python interpreter or its pip errors** (import failures inside
+  pip itself, missing-symbol / dylib errors, broken standard-library
+  modules): do NOT try to repair it — never patch system libraries, never
+  use DYLD tricks, never reinstall the OS interpreter. Install a known-good
+  Python instead and use it explicitly for everything from then on:
+  `brew install python@3.12` (Mac) or `winget install Python.Python.3.12`
+  (Windows), then run tools with `python3.12` / `py -3.12`. Newest Python
+  versions often have broken tooling on real machines; 3.12 is the proven
+  one for this kit.
 - Transcription needs `GROQ_API_KEY` in `.env` (class key from the
   instructor). No key → `--backend local` works offline but is slower and
   needs `pip install faster-whisper` plus a model download.
