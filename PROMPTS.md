@@ -49,6 +49,21 @@ browser. If it asks questions, answer yes.
 **Prompt 10 — Your own video**
 > [video path] edit this video with butabuilds-editor-skill
 
+## Extra Homework — Add the Remotion layer
+
+> Upgrade this workshop project with a separate Remotion workspace. Preserve every existing ButaCut, Python, footage, skill, and output file; do not replace the current workflow.
+>
+> 1. Detect my operating system and architecture. Check node, npm, and npx. If any are missing, install the current Node.js LTS (not Current) from official sources only: on Mac use Homebrew or the official Node installer; on Windows use "winget install OpenJS.NodeJS.LTS" or the official nodejs.org MSI. Open a fresh shell and verify all three versions.
+> 2. From the current project root, create "remotion-studio" with:
+>    npx create-video@latest --yes --blank --no-tailwind remotion-studio
+>    Keep it inside this project and do not create or keep a nested Git repository.
+> 3. Install the official Remotion skill at project scope:
+>    npx skills add remotion-dev/skills --skill remotion-best-practices
+>    Choose the agent I am using if prompted.
+> 4. Configure a vertical starter composition named CreatorVideo at 1080x1920, 30fps, with public/media, src/components, src/compositions, and out folders. Add scripts for Remotion Studio, a one-frame still, a full render, and typecheck. Use frame-driven Remotion animation, not CSS animation.
+> 5. Add a rule to butabuilds-editor-skill: keep transcription and cut decisions in ButaCut/FFmpeg; use Remotion for captions, motion graphics, overlays, compositing, and final rendering when it improves the result. Before rendering, show which layer each tool will handle and wait for my approval.
+> 6. Install dependencies, run typecheck, render a still to out/setup-check.png, start Remotion Studio in the background, open it in my browser, and say READY only when every check passes. Show the versions, paths, and check results.
+
 **Fix-it prompt** *(whenever anything breaks)*
 > Here is the error: [paste]. Fix it, then run the setup check again and show me the result.
 
