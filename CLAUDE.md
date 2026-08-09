@@ -74,7 +74,13 @@ back to the source timeline and fills the `text` track.
   `brew install python@3.12` (Mac) or `winget install Python.Python.3.12`
   (Windows), then run tools with `python3.12` / `py -3.12`. Newest Python
   versions often have broken tooling on real machines; 3.12 is the proven
-  one for this kit.
+  one for this kit. If the fresh 3.12 hits the SAME dylib/symbol error
+  (a broken Homebrew bottle — happens on Macs behind on macOS updates),
+  do not build from source: download the official python.org 3.12
+  installer (macOS universal2 .pkg) and use
+  `/usr/local/bin/python3.12` — python.org builds bundle their own
+  libraries and are immune to this. Tell the student a macOS Software
+  Update would fix Homebrew for good.
 - Transcription needs `GROQ_API_KEY` in `.env` (class key from the
   instructor). No key → `--backend local` works offline but is slower and
   needs `pip install faster-whisper` plus a model download.
