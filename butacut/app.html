@@ -333,7 +333,7 @@
         <div class="keyrow"><span>Mark cut in → out</span><span class="kbd">D</span></div>
         <div class="keyrow"><span>Cut section start → playhead</span><span class="kbd">Q</span></div>
         <div class="keyrow"><span>Cut playhead → section end</span><span class="kbd">W</span></div>
-        <div class="keyrow"><span>Delete selected (restore gap / remove chip)</span><span class="kbd">⌫</span></div>
+        <div class="keyrow"><span>Delete selected (cut section / restore gap / remove chip)</span><span class="kbd">⌫</span></div>
         <div class="keyrow"><span>Seek 1s · 0.1s · 1 frame</span><span class="kbd">←→ · ⇧←→ · , .</span></div>
         <div class="keyrow"><span>Zoom at cursor</span><span class="kbd">⌘ scroll</span></div>
         <div class="keyrow"><span>Undo</span><span class="kbd">⌘Z</span></div>
@@ -1518,7 +1518,11 @@ $("#delBtn").onclick = () => deleteSelected();
 
 function deleteSelected() {
   if (!sel) return;
-  if (sel.type === "gap") restoreGap(sel.idx);
+  if (sel.type === "keep") {
+    if (V.keeps.length <= 1) return;   // empty keeps = "keep everything" (contract) — never allow
+    const i = sel.idx; mutate(() => V.keeps.splice(i, 1)); sel = null; renderTracks(); updateInspector();
+  }
+  else if (sel.type === "gap") restoreGap(sel.idx);
   else if (sel.type === "text") { const i = sel.idx; mutate(() => V.text.splice(i, 1)); sel = null; renderTracks(); updateInspector(); }
   else if (sel.type === "sfx") { const i = sel.idx; mutate(() => V.sfx.splice(i, 1)); sel = null; renderTracks(); updateInspector(); }
   else if (sel.type === "fx") { const i = sel.idx; mutate(() => V.fx.splice(i, 1)); sel = null; renderTracks(); updateInspector(); }
