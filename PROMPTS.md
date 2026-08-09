@@ -38,13 +38,13 @@ browser. If it asks questions, answer yes.
 > I just finished fixing my first cut — I made changes in ButaCut and asked you for corrections in this chat. Re-read the project file (edit.json), compare it with what you originally wrote, and go back through my corrections. List every issue I had to fix, then identify the RECURRING ones and the exact fix that worked for each (example: a subtitle staying on screen after the word is already finished → end each subtitle at the word's end timestamp, not at the next word's start). Save the recurring issues and their fixes to review-notes.md — we'll bake them into my skill next.
 
 **Prompt 8 — Make it a skill**
-> Save the pipeline we just ran as a reusable skill named butabuilds-edit-skill. Look back through this whole conversation and collect every step we ran, every preference I stated, and every correction I made along the way — those are my editing preferences. Write them into the skill file together with the tools, the settings that worked, and the recurring fixes from review-notes.md, so next time I only have to say "edit this video".
+> Save the pipeline we just ran as a reusable skill named butabuilds-editor-skill. Look back through this whole conversation and collect every step we ran, every preference I stated, and every correction I made along the way — those are my editing preferences. Write them into the skill file together with the tools, the settings that worked, and the recurring fixes from review-notes.md, so next time I only have to say "edit this video".
 
 **Prompt 9 — Use the skill**
-> Edit the sample video with my skill.
+> delete the final version. now edit the sample video again with butabuilds-editor-skill
 
 **Prompt 10 — Your own video**
-> Edit the video I just added with my skill.
+> [video path] edit this video with butabuilds-editor-skill
 
 **Fix-it prompt** *(whenever anything breaks)*
 > Here is the error: [paste]. Fix it, then run the setup check again and show me the result.
