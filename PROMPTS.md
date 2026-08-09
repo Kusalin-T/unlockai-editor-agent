@@ -30,13 +30,17 @@ browser. If it asks questions, answer yes.
 **Prompt 6 — Effects when I call them**
 > Read my transcript and find every moment where I SAY an effect name: "zoom in", "zoom out", "whoosh", "sound effect", "pop up". Write fx/sfx events into the project file (edit.json) exactly per section 6 of butacut/edit-contract.md: each event fires at that word's start timestamp. "Zoom in" ramps ease-out over ~0.5s to 1.3x and HOLDS until I say "zoom out", which releases back to 1.0 — pair them, and add the whoosh sound to both. "Whoosh" plays assets/sfx/whoosh.mp3, "sound effect" plays assets/sfx/ding.mp3, "pop up" is a card pop-up plus assets/sfx/pop.mp3. Zoom scales only the video — subtitles stay unzoomed. Show me the events on the ButaCut timeline before rendering anything.
 
-**Prompt 7 — Make it a skill**
-> Save the pipeline we just ran as a reusable skill: write a file that records the steps, tools, and my preferred settings, so next time I only have to say "edit this video".
+**Prompt 7 — Review the cut (fix & iterate, then the retro)**
+*(first: watch your whole cut in ButaCut and fix anything that bugs you — drag it in ButaCut or tell your agent in your own words. When you're happy, paste this.)*
+> I just finished fixing my first cut — I made changes in ButaCut and asked you for corrections in this chat. Re-read the project file (edit.json), compare it with what you originally wrote, and go back through my corrections. List every issue I had to fix, then identify the RECURRING ones and the exact fix that worked for each (example: a subtitle staying on screen after the word is already finished → end each subtitle at the word's end timestamp, not at the next word's start). Save the recurring issues and their fixes to review-notes.md — we'll bake them into my skill next.
 
-**Prompt 8 — Use the skill**
+**Prompt 8 — Make it a skill**
+> Save the pipeline we just ran as a reusable skill: write a file that records the steps, tools, my preferred settings, and the recurring fixes from review-notes.md, so next time I only have to say "edit this video".
+
+**Prompt 9 — Use the skill**
 > Edit the sample video with my skill.
 
-**Prompt 9 — Your own video**
+**Prompt 10 — Your own video**
 > Edit the video I just added with my skill.
 
 **Fix-it prompt** *(whenever anything breaks)*
@@ -46,7 +50,7 @@ browser. If it asks questions, answer yes.
 
 ## Level up (free-experiment block)
 
-**Prompt 10 — Phrase subtitles (classic look)**
+**Prompt 11 — Phrase subtitles (classic look)**
 *(bursts are the default — use this if you prefer readable lines.)*
 > Remake my subtitles as normal readable phrases instead of one-word bursts — run the subtitles tool with --style plain, then burn a new video. Keep the Thai-aware line breaks (the tool handles them), update the project file so I can adjust the phrases in ButaCut, and give me the new file.
 
