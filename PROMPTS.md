@@ -21,6 +21,9 @@ browser. If it asks questions, answer yes.
 **Prompt 3 — Cut the silences**
 > Look at the tools in this folder. I want to cut the silent parts from the sample video — which tool does that? Run it.
 
+**Prompt 3b — Cut tighter** *(optional — only if the first cut kept noise or left long pauses)*
+> The silence cut isn't tight enough: it counted some background noise as me talking, and it left the pauses too long. Run the silence-cut tool again with stricter settings — raise --threshold one step so background noise counts as silence, and lower --min-silence to 0.2 so shorter pauses get cut too. Replace the previous cut and tell me the before/after duration — I'll check the timeline in ButaCut.
+
 **Prompt 4 — Cut the mistakes (repeated takes)**
 > When I mess up a line I repeat the same word or phrase. Find every repeated take in my transcript: consecutive identical words or phrases (ignore case and punctuation, at least 2 characters, repeats within 2.5 seconds of each other). Keep only the LAST occurrence and cut the earlier ones by updating the keeps in the project file, per section 6 of butacut/edit-contract.md: pad the cut 0.05s before the flubbed take, end it 0.03s before the kept take, and never let a cut eat a word that stays in. List every cut you made with its timestamp — I'll restore anything you got wrong in ButaCut.
 
