@@ -22,22 +22,30 @@ yourself; only ask me when you need a choice or a password. Steps:
    - Mac: if "brew" is missing, install Homebrew with its official
      installer script (it will ask for my password), then activate it:
      eval "$(/opt/homebrew/bin/brew shellenv)"
-   - Windows: if "winget" is missing, open the Microsoft Store page
-     ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1 for me to install
-     "App Installer", then use a NEW terminal.
+   - Windows: check "winget --version" once. If winget is missing, hangs,
+     or errors, do NOT install it and do NOT open the Microsoft Store —
+     nothing in this setup needs winget itself. Just use the direct
+     downloads in steps 2–3 instead.
    If bootstrapping fails, read
    https://raw.githubusercontent.com/Kusalin-T/unlockai-editor-agent/main/SETUP-HELP.md
    and follow its direct-download fallbacks; as a last resort open the
    relevant download page in my browser so I can install it by hand.
 2. Make sure real ffmpeg is installed:
    - Mac: brew install ffmpeg
-   - Windows: winget install Gyan.FFmpeg
+   - Windows with winget: winget install Gyan.FFmpeg
+   - Windows without winget: download
+     https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip ,
+     extract it, and copy the archive's inner bin folder to C:\ffmpeg\bin
+     (so C:\ffmpeg\bin\ffmpeg.exe exists) — the tools look there.
    Never install imageio-ffmpeg or any "python ffmpeg" package — those
    builds cannot burn subtitles. After installing, use a fresh shell so
    PATH updates apply.
 3. Make sure Python 3.11+ is installed:
    - Mac: brew install python@3.12
-   - Windows: winget install Python.Python.3.12
+   - Windows with winget: winget install Python.Python.3.12
+   - Windows without winget: download the official Python 3.12 installer
+     from python.org and run it with the flags /quiet PrependPath=1 —
+     then use a NEW terminal so python is on PATH.
 4. Download https://github.com/Kusalin-T/unlockai-editor-agent/archive/refs/heads/main.zip
    and unzip its CONTENTS directly into the current working folder
    (Documents/butabuilds-workshop-editor — the folder this session is

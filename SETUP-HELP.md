@@ -32,23 +32,25 @@ re-run `python tools/verify_setup.py`.
   Homebrew. If truly stuck, pair the student with a neighbor's machine for
   the render step.
 
-## Windows: winget is not installed / not recognized
+## Windows: winget is not installed / not recognized / hangs
 
-winget ships with modern Windows 10/11 as "App Installer". If
-`winget --version` fails:
+Do NOT stop to install winget — nothing in this workshop needs winget
+itself, only the two things it would have installed. Skip it and install
+those directly:
 
-1. Open the Microsoft Store page for the human to click Install/Update:
-   `start ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1`
-   (or open https://aka.ms/getwinget in the browser). Then open a NEW
-   terminal and retry `winget`.
-2. **Fallback — no winget at all, install directly:**
-   - **ffmpeg**: download https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip ,
-     extract it, and copy the archive's inner `bin` folder to `C:\ffmpeg\bin`
-     (so `C:\ffmpeg\bin\ffmpeg.exe` exists). The workshop tools look there
-     automatically — no PATH editing needed.
-   - **Python**: open https://www.python.org/downloads/windows/ — the human
-     runs the 3.12 installer and MUST tick "Add python.exe to PATH".
-     Then open a NEW terminal.
+1. **ffmpeg**: download https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip ,
+   extract it, and copy the archive's inner `bin` folder to `C:\ffmpeg\bin`
+   (so `C:\ffmpeg\bin\ffmpeg.exe` exists). The workshop tools look there
+   automatically — no PATH editing needed.
+2. **Python**: download the official 3.12 installer from
+   https://www.python.org/downloads/windows/ and run it with
+   `/quiet PrependPath=1` (or the human runs it and MUST tick
+   "Add python.exe to PATH"). Then open a NEW terminal.
+
+Last resort only (direct downloads blocked, e.g. a managed machine):
+install "App Installer" from the Microsoft Store —
+`start ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1` or
+https://aka.ms/getwinget — open a NEW terminal, then retry `winget`.
 
 ## Either OS: installed, but a fresh shell still can't find it
 
