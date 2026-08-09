@@ -12,3 +12,7 @@ butacut/cache/
 
 # NOTE: assets/ and footage/ are deliberately NOT ignored — the fonts and the
 # sample video must travel with this repo or nothing renders.
+
+# edit/transcript sidecars are per-student working state, never shipped
+footage/*.edit.json
+footage/*.transcript.json
