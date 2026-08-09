@@ -40,6 +40,9 @@ browser. If it asks questions, answer yes.
 **Prompt 8 — Make it a skill**
 > Save the pipeline we just ran as a reusable skill named butabuilds-editor-skill. Look back through this whole conversation and collect every step we ran, every preference I stated, and every correction I made along the way — those are my editing preferences. Write them into the skill file together with the tools, the settings that worked, and the recurring fixes from review-notes.md, so next time I only have to say "edit this video".
 
+**Prompt 8b — Make effects intentional** *(update the skill for real videos)*
+> Update butabuilds-editor-skill so it chooses effects intelligently for real videos instead of only adding them when the transcript literally says an effect name. Add an effect-planning checkpoint after transcription, cuts, and subtitles but before any fx/sfx are written: read the transcript and propose a short plan for where zoom in, zoom out, whoosh, sound effect, or pop up would strengthen emphasis, pacing, or clarity. For each suggestion, show the timestamp, the transcript phrase, the effect, and one short reason. Use effects sparingly; it is okay to suggest none. Show me the plan and wait for my approval or changes. Only after I approve may you write the effects to edit.json and render. Save this rule in the skill.
+
 **Prompt 9 — Use the skill**
 > delete the final version. now edit the sample video again with butabuilds-editor-skill
 
