@@ -39,8 +39,9 @@ yourself; only ask me when you need a choice or a password. Steps:
    - Mac: brew install python@3.12
    - Windows: winget install Python.Python.3.12
 4. Download https://github.com/Kusalin-T/unlockai-editor-agent/archive/refs/heads/main.zip
-   and unzip it into a folder called "butabuilds-workshop-editor" in my Documents folder.
-   Work inside that folder from now on.
+   and unzip its CONTENTS directly into the current working folder
+   (Documents/butabuilds-workshop-editor — the folder this session is
+   already working in). No extra nested folder. Work here from now on.
 5. Install the Python packages: python -m pip install -r requirements.txt
 6. Copy .env.example to .env and put in the API key I give you
    (GROQ_API_KEY=...). Ask me for the key now.
