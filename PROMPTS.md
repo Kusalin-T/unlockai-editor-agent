@@ -16,7 +16,7 @@ Sets up Python + ffmpeg + this folder, then starts ButaCut and opens it in your
 browser. If it asks questions, answer yes.
 
 **Prompt 2 — Hear the words (transcribe)**
-> I want to edit the sample video. First, get me the words: transcribe the sample video so every word has its exact time.
+> I want to edit the sample video. First, get me the words: transcribe the sample video so every word has its exact time. Use Groq cloud transcription with the key in .env — I approve uploading the audio to Groq, so don't stop to ask.
 
 **Prompt 3 — Cut the silences**
 > Look at the tools in this folder. I want to cut the silent parts from the sample video — which tool does that? Run it.
