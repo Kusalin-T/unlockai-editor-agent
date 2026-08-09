@@ -4,5 +4,5 @@
     "outputs"
   ],
   "port": 8766,
-  "agent_prompt": "Finish my edit and give me the final video.\n\nEdit file:    {edit}\nSource video: {video}\nOutput:       {output}\n\nThe edit file follows butacut/edit-contract.md (keeps/text/sfx/fx, all in SOURCE-video\nseconds; section 6 = the house defaults). Use the tools in tools/ (see AGENTS.md):\ncut the keeps, make and burn the subtitles, and save the finished video to the output\npath above. Then open the finished file so I can watch it."
+  "agent_prompt": "Finish my edit and give me the final video.\n\nEdit file:    {edit}\nSource video: {video}\nOutput:       {output}\n\nRun: python tools/render_final.py --edit \"{edit}\" --out \"{output}\"\nIt cuts the keeps, applies the zooms, burns the text bursts and pop-up\ncards, and mixes the sound effects — everything the ButaCut preview\nshows (contract: butacut/edit-contract.md). If it fails, run\npython tools/verify_setup.py, fix what it reports, and retry.\nThen open the finished file so I can watch it."
 }

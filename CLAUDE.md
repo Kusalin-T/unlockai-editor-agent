@@ -20,6 +20,7 @@ rule in Practical notes if that interpreter or its pip misbehaves.
 | `transcribe.py` | Speech → text with word timestamps (Groq cloud, or `--backend local`) |
 | `make_subtitles.py` | Transcript → styled `.ass` subtitles — **one-word Thai bursts by default** (mid-frame, word-exact timing, contract §6 rules built in); `--style plain` for classic bottom lines |
 | `burn_subtitles.py` | Burn the `.ass` into the video → final mp4 |
+| `render_final.py` | The FULL finish: reads the ButaCut edit.json and renders cuts + zooms + burned text/cards + mixed sfx in one pass — what the ButaCut preview shows. `--edit <video>.edit.json` |
 | `verify_setup.py` | Check the machine; run this FIRST whenever anything fails |
 
 Every tool supports `--help`. Outputs go to `outputs/`. The sample footage is
