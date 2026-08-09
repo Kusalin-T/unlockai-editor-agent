@@ -22,7 +22,7 @@ browser. If it asks questions, answer yes.
 > Now I need the words. Transcribe the cut video.
 
 **Prompt 4 — Subtitles** *(slide 22)*
-> Turn the transcript into subtitles.
+> Turn the transcript into subtitles — normal readable phrases (plain style), not one-word bursts.
 
 **Prompt 5 — Burn** *(slide 23)*
 > Burn the subtitles into the video. Give me the final file.
@@ -46,13 +46,13 @@ browser. If it asks questions, answer yes.
 **Prompt 10 — One-word burst subtitles**
 *(bursts are now `make_subtitles.py`'s default — Prompt 4 already gives you
 this. Use this prompt if your subtitles came out as lines, or to rebuild.)*
-> Change my subtitles into one-word bursts — one big word at a time, centered on the video, timed to exactly when I say each word. Use the real word timestamps from the transcript (never guess or spread timings evenly), and follow the burst rules in butacut/edit-contract.md section 6. Update the project file so I can see and adjust every word in ButaCut.
+> Remake my subtitles as one-word bursts — one big word at a time, centered, timed to exactly when I say each word. Use the built-in burst style: run the subtitles tool with --style burst on my transcript, then burn a new video. The rules are built into the tool — verify them, don't reinvent: timings come from the real transcript word timestamps (never spread evenly), bursts never overlap, none shorter than 0.16s, and no burst starts with a Thai vowel or tone mark. Update the project file so I can see every word in ButaCut, and give me the new burned file.
 
 **Prompt 11 — Effects when I call them**
-> Listen to my transcript for the moments where I SAY an effect name — "zoom in", "zoom out", "whoosh", "sound effect", "pop up". Make each effect actually happen at the exact moment I say its word: zoom in should ease in about half a second and HOLD until I say zoom out; add a matching sound for each moment (sound files are in assets/sfx). The rules are in butacut/edit-contract.md section 6. Write it all into the project file so the effects show on the ButaCut timeline and I can drag them.
+> Read my transcript and find every moment where I SAY an effect name: "zoom in", "zoom out", "whoosh", "sound effect", "pop up". Write fx/sfx events into the project file (edit.json) exactly per section 6 of butacut/edit-contract.md: each event fires at that word's start timestamp. "Zoom in" ramps ease-out over ~0.5s to 1.3x and HOLDS until I say "zoom out", which releases back to 1.0 — pair them, and add the whoosh sound to both. "Whoosh" plays assets/sfx/whoosh.mp3, "sound effect" plays assets/sfx/ding.mp3, "pop up" is a card pop-up plus assets/sfx/pop.mp3. Zoom scales only the video — subtitles stay unzoomed. Show me the events on the ButaCut timeline before rendering anything.
 
 **Prompt 12 — Cut my flubbed takes**
-> When I mess up a line I repeat the same word or phrase. Find every place in the transcript where I say the same thing two or more times in a row, keep only the LAST one, and cut the earlier ones (rules in butacut/edit-contract.md section 6). Show me in ButaCut what you cut — I'll restore anything you got wrong.
+> When I mess up a line I repeat the same word or phrase. Find every repeated take in my transcript: consecutive identical words or phrases (ignore case and punctuation, at least 2 characters, repeats within 2.5 seconds of each other). Keep only the LAST occurrence and cut the earlier ones by updating the keeps in the project file, per section 6 of butacut/edit-contract.md: pad the cut 0.05s before the flubbed take, end it 0.03s before the kept take, and never let a cut eat a word that stays in. List every cut you made with its timestamp — I'll restore anything you got wrong in ButaCut.
 
 **Prompt 13 — Finish**
 Click **Apply cut** in ButaCut → it shows a prompt written for your project →
