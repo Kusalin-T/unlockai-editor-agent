@@ -44,6 +44,8 @@ browser. If it asks questions, answer yes.
 ## Level up (free-experiment block — these are how the pros' edits feel)
 
 **Prompt 10 — One-word burst subtitles**
+*(bursts are now `make_subtitles.py`'s default — Prompt 4 already gives you
+this. Use this prompt if your subtitles came out as lines, or to rebuild.)*
 > Change my subtitles into one-word bursts — one big word at a time, centered on the video, timed to exactly when I say each word. Use the real word timestamps from the transcript (never guess or spread timings evenly), and follow the burst rules in butacut/edit-contract.md section 6. Update the project file so I can see and adjust every word in ButaCut.
 
 **Prompt 11 — Effects when I call them**

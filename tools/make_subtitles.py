@@ -64,6 +64,16 @@ class Chunk:
 
 MAX_WORD_DURATION = 2.0  # cap: whisper sometimes gives one char a huge duration
 
+# Thai characters that can never start a word (vowels/tone marks that attach
+# to the letter BEFORE them). A "word" starting with one of these is half a
+# word — whisper split mid-word and tokenization must repair it.
+THAI_COMBINING = set(
+    "ัำิีึืฺุู"  # ั ำ ิ ี ึ ื ุ ู ฺ
+    "ๅ็่้๊๋์ํ๎"  # ๅ ็ ่ ้ ๊ ๋ ์ ํ ๎
+)
+
+BURST_MIN_DURATION = 0.16   # a burst shorter than this is an unreadable flash
+
 
 def _sanitize_words(words: list[Word]) -> list[Word]:
     out: list[Word] = []
@@ -242,6 +252,72 @@ def chunk_by_thai_semantic(transcript: dict, n_words: int = 5) -> list[Chunk]:
     return all_chunks
 
 
+def chunk_bursts(transcript: dict) -> list[Chunk]:
+    """
+    One-word bursts — one big word at a time, timed to when it is spoken.
+    The rules live in butacut/edit-contract.md section 6; the ones that
+    matter here:
+
+    - Tokenize the WHOLE transcript text in one pass (whisper splits Thai
+      words across fragment AND segment boundaries; tokenizing per segment
+      produces orphan combining marks like "์ยว" at chunk starts).
+    - Anchor each token's time to the real whisper fragment times. Only
+      when several tokens share one fragment is the fragment's window
+      divided proportionally by character — never across fragments.
+    - A burst must never start with a Thai combining mark: fold it into
+      the previous burst (it is the tail of that word).
+    - Minimum burst duration; bursts never overlap (clip to the next one).
+    """
+    from pythainlp.tokenize import word_tokenize
+
+    flat = _flatten_words(transcript)
+    if not flat:
+        return []
+
+    full_text = "".join(w.word for w in flat)
+
+    # Time at every character boundary: exact at fragment edges,
+    # proportional within a fragment.
+    bounds: list[float] = []
+    for w in flat:
+        n = max(1, len(w.word))
+        dt = (w.end - w.start) / n
+        for i in range(len(w.word)):
+            bounds.append(w.start + i * dt)
+    bounds.append(flat[-1].end)
+
+    tokens = word_tokenize(full_text, engine="newmm", keep_whitespace=True)
+
+    bursts: list[Chunk] = []
+    char_pos = 0
+    for tok in tokens:
+        start_char = char_pos
+        char_pos += len(tok)
+        text = tok.strip()
+        if not text or start_char >= len(bounds) - 1:
+            continue
+        end_char = min(char_pos, len(bounds) - 1)
+        start, end = bounds[start_char], bounds[end_char]
+        if bursts and text[0] in THAI_COMBINING:
+            prev = bursts[-1].words[0]
+            bursts[-1] = Chunk(words=[Word(prev.word + text, prev.start,
+                                           max(prev.end, end))])
+            continue
+        bursts.append(Chunk(words=[Word(text, start, end)]))
+
+    # Readability floor + strict non-overlap.
+    out: list[Chunk] = []
+    for i, b in enumerate(bursts):
+        start = b.start
+        end = max(b.end, start + BURST_MIN_DURATION)
+        if i + 1 < len(bursts):
+            end = min(end, bursts[i + 1].start)
+        if end <= start:
+            end = start + 0.05
+        out.append(Chunk(words=b.words, _start_override=start, _end_override=end))
+    return out
+
+
 # ── ASS writing ─────────────────────────────────────────────────────────────
 
 
@@ -333,6 +409,7 @@ def _block_text_karaoke(chunk: Chunk) -> str:
 
 
 _STYLE_BUILDERS = {
+    "burst": _block_text_pop,
     "plain": _block_text_plain,
     "pop": _block_text_pop,
     "karaoke": _block_text_karaoke,
@@ -385,7 +462,9 @@ def write_ass_file(
     chunks: Iterable[Chunk], style: str, out_path: Path, style_params: AssStyleParams
 ) -> tuple[Path, list[Chunk]]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    chunk_list = _ensure_gaps(list(chunks))
+    # Bursts arrive already timed (word-exact, non-overlapping) — the
+    # lead/floor pass below is for multi-word line chunks only.
+    chunk_list = list(chunks) if style == "burst" else _ensure_gaps(list(chunks))
     body = [write_ass_header(style_params)]
     for chunk in chunk_list:
         body.append(render_dialogue(chunk, style))
@@ -424,7 +503,8 @@ def _cut_time_to_source_time(t: float, keeps: list[dict]) -> float:
     return float(keeps[-1]["out"]) if keeps else t
 
 
-def update_edit_json_text(video: Path, chunks: list[Chunk], ass_path: Path) -> Path | None:
+def update_edit_json_text(video: Path, chunks: list[Chunk], ass_path: Path,
+                          extra_fields: dict | None = None) -> Path | None:
     """Write the subtitle chunks into the ButaCut sidecar's `text` track
     (contract v1: entries are {in, out, content, origin} in SOURCE seconds).
 
@@ -450,6 +530,7 @@ def update_edit_json_text(video: Path, chunks: list[Chunk], ass_path: Path) -> P
     doc.setdefault("video", target_video.name)
     doc.setdefault("keeps", [])
     doc.setdefault("sfx", [])
+    extra = extra_fields or {}
     if keeps:
         doc["text"] = [
             {
@@ -457,13 +538,14 @@ def update_edit_json_text(video: Path, chunks: list[Chunk], ass_path: Path) -> P
                 "out": round(_cut_time_to_source_time(c.end, keeps), 3),
                 "content": c.text,
                 "origin": "subtitles",
+                **extra,
             }
             for c in chunks
         ]
     else:
         doc["text"] = [
             {"in": round(c.start, 3), "out": round(c.end, 3),
-             "content": c.text, "origin": "subtitles"}
+             "content": c.text, "origin": "subtitles", **extra}
             for c in chunks
         ]
     doc["updated"] = _time.strftime("%Y-%m-%dT%H:%M:%S")
@@ -501,19 +583,24 @@ def main() -> None:
     parser.add_argument("--video", type=Path, default=None,
                         help="The video these subtitles are for — used to match "
                              "resolution and update its ButaCut project file")
-    parser.add_argument("--style", choices=list(_STYLE_BUILDERS), default="plain",
-                        help="plain (default) | pop (bounce in) | "
-                             "karaoke (highlights the current word)")
+    parser.add_argument("--style", choices=list(_STYLE_BUILDERS), default="burst",
+                        help="burst (default: one big word at a time, "
+                             "mid-frame, timed to the voice) | plain | "
+                             "pop (bounce in) | karaoke (highlights the "
+                             "current word)")
     parser.add_argument("--chunk-by", choices=["thai_words", "duration"],
                         default="thai_words",
-                        help="thai_words (default): N real Thai words per "
+                        help="For line styles only (burst ignores this). "
+                             "thai_words (default): N real Thai words per "
                              "subtitle. duration: time-based")
     parser.add_argument("--chunk-size", type=float, default=5,
                         help="N words (thai_words) or seconds (duration). "
                              "Default: 5")
     parser.add_argument("--position", choices=list(POSITION_TO_ALIGNMENT),
-                        default="bottom")
-    parser.add_argument("--font-size", type=int, default=64)
+                        default=None,
+                        help="Default: center for burst, bottom otherwise")
+    parser.add_argument("--font-size", type=int, default=None,
+                        help="Default: 96 for burst, 64 otherwise")
     parser.add_argument("--color", type=str, default="#FFFFFF")
     parser.add_argument("--outline", type=int, default=3)
     parser.add_argument("--margin-v", type=int, default=None,
@@ -530,15 +617,17 @@ def main() -> None:
 
     transcript = json.loads(args.transcript.read_text(encoding="utf-8"))
 
-    if args.chunk_by == "thai_words":
-        try:
+    try:
+        if args.style == "burst":
+            chunks = chunk_bursts(transcript)
+        elif args.chunk_by == "thai_words":
             chunks = chunk_by_thai_semantic(transcript, max(1, int(args.chunk_size)))
-        except ImportError:
-            print("[FAIL] pythainlp is not installed. Run: "
-                  f"{sys.executable} -m pip install -r requirements.txt")
-            sys.exit(1)
-    else:
-        chunks = chunk_by_duration(transcript, float(args.chunk_size))
+        else:
+            chunks = chunk_by_duration(transcript, float(args.chunk_size))
+    except ImportError:
+        print("[FAIL] pythainlp is not installed. Run: "
+              f"{sys.executable} -m pip install -r requirements.txt")
+        sys.exit(1)
 
     if not chunks:
         print("[FAIL] transcript has no timed words — re-run transcribe.py")
@@ -550,6 +639,10 @@ def main() -> None:
         if res:
             play_x, play_y = res
 
+    is_burst = args.style == "burst"
+    position = args.position or ("center" if is_burst else "bottom")
+    font_size = args.font_size or (96 if is_burst else 64)
+
     margin_v = args.margin_v
     if margin_v is None:
         # Vertical video: sit at ~1/3 from the bottom (clear of IG/TikTok UI).
@@ -557,11 +650,11 @@ def main() -> None:
 
     style_params = AssStyleParams(
         font_name="Noto Sans Thai",
-        font_size=args.font_size,
+        font_size=font_size,
         primary_color=args.color,
         outline=args.outline,
         bold=True,
-        alignment=POSITION_TO_ALIGNMENT[args.position],
+        alignment=POSITION_TO_ALIGNMENT[position],
         margin_v=margin_v,
         play_res_x=play_x,
         play_res_y=play_y,
@@ -578,7 +671,8 @@ def main() -> None:
           f"style={args.style}, {play_x}x{play_y})")
 
     if args.video:
-        edit_path = update_edit_json_text(args.video, final_chunks, output)
+        extra = {"style": "burst", "pos": "mid"} if is_burst else {}
+        edit_path = update_edit_json_text(args.video, final_chunks, output, extra)
         if edit_path:
             print(f"[OK] project file {edit_path.name} updated "
                   "(ButaCut will show the subtitles)")
