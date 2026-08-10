@@ -106,8 +106,8 @@ AGENTS.md         instructions your AI agent reads automatically
 
 ## Transcription: free vs better
 
-- **Workshop default**: Groq cloud Whisper — free tier, fast. The class key
-  dies after the workshop; make your own free key at
+- **Workshop default**: Groq cloud Whisper — free tier, fast. The workshop
+  class key is now disabled; make your own free key at
   https://console.groq.com → API Keys, and put it in `.env`.
 - **No key at all**: `python tools/transcribe.py <video> --backend local`
   runs Whisper on your machine (needs `pip install faster-whisper`; first
