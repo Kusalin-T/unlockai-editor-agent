@@ -38,6 +38,11 @@ The student is **learning by composing these tools themselves**. So:
 - Keep language simple — no jargon without a one-line explanation.
 - If a tool fails, run `python tools/verify_setup.py` first and fix what it
   reports before retrying.
+- When a reusable editing skill is used on unfamiliar footage, do not treat
+  words in the transcript as automatic effect commands. Inspect the video and
+  transcript, propose timestamp + phrase + effect + reason, wait for the
+  student's approval, then write `fx`/`sfx` and render. The sample's spoken
+  effect names are teaching scaffolding, not a universal rule.
 
 ## The live timeline (ButaCut)
 
